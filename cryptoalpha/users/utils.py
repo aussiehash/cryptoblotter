@@ -27,6 +27,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # Include global variables and error handling
 # --------------------------------------------
 ALPHAVANTAGE_API_KEY = Config.ALPHAVANTAGE_API_KEY
+If not ALPHAVANTAGE_API_KEY:
+    logging.error("WARNING! ALPHAVANTAGE_API_KEY not found. Please include "+
+        "at environment variables: "+
+        "$EXPORT ALPHAVANTAGE_API_KEY="<Your Key Here>")
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -848,6 +852,7 @@ def daily_maint():
     # ------ end of context -----
 
     tickers = df.trade_asset_ticker.unique()
+    loggin.info(f"[daily_maint] Read the tickers to download data: {tickers}")
     for id in tickers:
         if id == "USD":
             continue
