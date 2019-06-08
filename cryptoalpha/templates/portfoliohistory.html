@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<!-- Datatables.net CDN -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<!--  High Charts -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="static/highcharts.js"></script>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+                <div id="navchart" style="min-width: 310px; height: 400px; margin: 0 auto">
+                        <img class="mx-auto d-block" src="static/images/chart_loading.gif"></img>
+                </div>
+
+        </div>
+    </div>
+</div>
+</br>
+</br>
+
+<div class="container">
+    <div class="row">
+
+            <div class="col-sm-12">
+                <table id="portfoliohistory" class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-center"scope="col">
+                                Date
+                            </th>
+                            {% for position in positions %}
+                            <th scope="col" class="text-center">
+                                {{position.trade_asset_ticker}}
+                            </th>
+                            {% endfor %}
+
+
+
+                            <th scope="col" class="text-center">
+                                Portfolio
+                            </th>
+                            <th scope="col" class="text-center">
+                                NAV
+                            </th>
+
+                            <th scope="col" class="text-center">
+                                Transactions
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="history">
+                        {% for element in history %}
+
+                        <tr id="{{element}}">
+
+                        <th class="align-middle text-left" scope="row">
+                            {{element.strftime('%m-%d-%Y')}}
+                        </td>
+
+                        {% for position in positions %}
+                        <td class="align-middle text-right" scope="row">
+                            {% if (history[element][position.trade_asset_ticker]['balance']) == 0 %}
+                                -
+                            {% else %}
+                                {% if position.trade_asset_ticker == "USD" %}
+                                    $ {{"{:,.0f}".format(history[element][position.trade_asset_ticker]['balance'])}}</td>
+                                {% else %}
+                                    {{"{:,.4f}".format(history[element][position.trade_asset_ticker]['balance'])}}</td>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+
+                        <td class="align-middle text-right" scope="row">
+                            ${{"{:,.0f}".format(history[element]['portfolio'])}}</td>
+                        <td class="align-middle text-right" scope="row">
+                            {{"{:,.2f}".format(history[element]['NAV'])}}</td>
+
+
+                        <td id="transaction{{element}}" class="align-middle text-center" scope="row">
+
+                            {% set ns = namespace(f=0) %}
+
+                            {% for position in positions %}
+
+                                {% if history[element][position.trade_asset_ticker]["trade_id"] %}
+                                {% if ns.f == 0 %}
+                                <button id="button" type="button" class="btn btn-primary" data-toggle="collapse" data-target="#expand{{element}}">
+                                    <span class="glyphicon glyphicon-collapse-down"></span> Details
+                                </button>
+                                {% set ns.f = 1 %}
+                                {% endif %}
+                                {% endif %}
+
+                            {% endfor %}
+
+                            <div id="expand{{element}}" class="collapse">
+
+                            {% for position in positions %}
+                                        {% for trade in history[element][position.trade_asset_ticker]["trade_id"] %}
+                                    </br>
+                                            <div class="card card-body text-center text-muted" role="alert">
+
+                                                {% for transaction in transactions %}
+                                                    {%if transaction.id == trade %}
+                                                        {% if transaction.trade_operation == "B" %}
+                                                            Bought
+                                                        {% elif transaction.trade_operation == "S" %}
+                                                            Sold
+                                                        {% endif %}
+                                                        {{"{:,.4f}".format(transaction.trade_quantity)}} </br>
+                                                        {{transaction.trade_asset_ticker}} @
+                                                        ${{"{:,.2f}".format(transaction.trade_price)}} </br>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                <a class="btn btn-outline-dark" role="button" href="/edittransaction?id={{trade}}">
+                                                    Edit Trade
+                                                </a>
+                                            </div>
+                                        {% endfor %}
+
+                            {% endfor %}
+
+                            </div>
+
+                    <!-- next date -->
+                    {% endfor %}
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+    </div>
+</div>
+
+<script src="/static/portfoliohistory.js"></script>
+
+{% endblock content %}

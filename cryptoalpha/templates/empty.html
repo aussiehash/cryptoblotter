@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-8">
+            <h4>
+                Your portfolio appears to be empty and no transactions were found </br>
+                </h4>
+                Maybe you are new here?</br>
+                You can start by including some <a href="{{url_for('transactions.newtrade')}}">transactions</a>.
+            </br>
+            <hr>
+                You may also choose to <a href="/importcsv">upload a csv file</a> with existing transactions. Instructions can be found <a href="/csvtemplate">here</a>.
+
+        </div>
+        <div class="col-sm-4">
+            <img class="mx-auto d-block" src="static/images/empty.png" width="75" height="125"></img>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<div class="container">
+
+
+        <h2>
+            CSV File Format
+        </h2>
+        <hr>
+    </br>
+            The template below summarizes the expected file format for
+            .csv files being imported into a portfolio. </br></br>
+
+            A sample csv file can be downloaded <a href='static/downloads/sample.csv'>here</a>.</br></br>
+
+            Although transactions can be included on a one-by-one
+            basis throught the <a href="{{url_for('transactions.newtrade')}}">
+            transactions</a> page, we recommend importing .csv files
+            for bulk importing. </br></br>
+
+            Please make sure your file matches the expected format below.
+        </br></br>
+            Numbers should be formated without thousand separators (comma) and with decimals after a dot.
+            Make sure the numbers have the needed decimal places. Specially for quantities.
+        </br></br>
+            Fist line in the CSV file will not be imported - it will be assumed it includes the column names.
+        </br></br>
+            <span class="text-danger">IMPORTANT: </span>
+            CryptoBlotter can record CASH AND ASSET trades in pairs. Which means that a trade
+            included through the <a href="{{url_for('transactions.newtrade')}}">
+            transactions</a> page could include 2 lines in the database: </br>
+            </br>
+            <span class="text-info">Line 1: The Buy or Sell transaction. Ex: Bought 1 BTC at Coinbase for $5,000</span>
+            </br>
+            <span class="text-info">Line 2: The matching deposit or withdraw from a cash account. Ex: Witdrew $5,000 from Bank XYZ</span>
+        </br></br>
+            Transactions can be matched to each other through the trade_reference_id field.
+            Which means that two matched transactions will have the same trade_reference_id.
+            The transactions should also be imported in sequential lines. See below for a sample paired transaction and how it was included in the database: </br> </br>
+            <img class="img-thumbnail" src="static/images/sample_trade.png"></img>
+
+        </br></br>
+
+            <h5> CSV FILE FORMAT </h5>
+            <span class="codetext"> Timestamp, Account, Operator, Asset, Quantity, Price, Fee, Cash_Value, Notes, trade_reference_id </span>
+        </br></br>
+            <h5> Field Details </h5>
+
+
+            <table id="custodytable" class="table table-sm align-middle">
+                <thead>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Timestamp</pre></h4>
+
+                        </td>
+                        <td>
+                                format: mm/dd/yy (optional: mm/dd/yy hh:mm:ss). Ex: 01/27/2015
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Account</pre></h4>
+
+                        </td>
+                        <td>
+                                Account Name where the transaction took place. Ex: Coinbase
+                                Please note that accounts will be automatically imported into the <a href="\tradeaccounts">account list</a>.
+                            </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Operator</pre></h4>
+
+                        </td>
+                        <td>
+                                B: Buy, S: Sell, D: Deposit, W: Withdraw
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Asset</pre></h4>
+
+                        </td>
+                        <td>
+                                <a href="/cryptolist">Ticker</a> for the traded asset. Example: BTC.
+                                For cash transactions the ticker should be <span class="codetext"> USD</span>.
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Quantity</pre></h4>
+
+                        </td>
+                        <td>
+                                Quantity of coins being traded (ex: 1.0000293). For USD transactions, it should be the dollar ammount. (ex: 3500)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Price</pre></h4>
+
+                        </td>
+                        <td>
+                                Price of buy or sell (ex: 2500). For USD transactions, price is always equal to 1.
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Fees</pre></h4>
+
+                        </td>
+                        <td>
+                                Transaction fees in currency. Ex: 200.
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Cash Value</pre></h4>
+                        </td>
+                        <td>
+                                The amount in fiat of the current transaction. If none provided it will default to <span class="codetext"> (price x quantity) + fees </span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Trade Notes</pre></h4>
+                        </td>
+                        <td>
+                                Any notes regarding this transaction. Text open field.
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-left">
+                                <h4><pre>Trade_ID</pre></h4>
+
+                        </td>
+                        <td>
+                                Trade identifier - can be a duplicate if matching trades (Buy with Withdraw, Sell with Deposit).
+                        </td>
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+
+</div>
+
+{% endblock content %}

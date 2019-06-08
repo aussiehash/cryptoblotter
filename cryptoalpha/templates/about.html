@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<div class="row">
+    <div class="col-sm-10 col-md-10">
+        <div class="thumbnail">
+            <h1>
+                CryptoBlotter v.01
+
+            <img src="static/images/bitcoin-logo-gray.jpg" width="40" height="40" alt="Bitcoin">
+            </h1>
+            <hr>
+            <div class="caption">
+                <p>
+                    Please note that this is an ALPHA version still under development and test.
+                    Use at your own risk. We cannot guarantee the accuracy of the data and we will be reseting the database from time to time.
+                    Your trades may get deleted.
+                </p>
+
+                    This is work in progress. If you have suggestions or feedback please
+                    <a href="/contact">click here</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

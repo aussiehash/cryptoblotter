@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+body {background: url("static/images/background_gb.png") no-repeat; background-size: cover;}
+.section-center__full {
+  height: 45vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+<br>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-lg-8'>
+            <div class="jumbotron-fluid">
+                <h1 class="display-4 text-white">CryptoBlotter v.01</h1>
+                <p class="lead text-white">Open Source portfolio tracking tool</p>
+                <hr style="border-top: 1px solid white;">
+                <p class="text-white">You are encouraged to run this software locally in your computer. It's easy to install. </p>
+                <p class="lead text-white">
+                  <i class="fab fa-github"></i>&nbsp;Source code available at <a class='text-white' href='https://github.com/pxsocs/cryptoalpha'>GitHub</a> <span class="badge badge-info">available soon</span><br>
+                  Submit any questions, suggestions or requests at the <a class='text-white' href='https://github.com/pxsocs/cryptoalpha'>repository</a>.
+                </p>
+            </div>
+        </div>
+        <div class='col-lg-4' style="display: table-cell; vertical-align: middle;">
+            <br>
+
+                <div>
+                     <a class="btn btn-outline-light btn-lg btn-block" href={{ url_for('users.login')}} role="button">
+                         Login to your portfolio</a>
+                </div>
+                <div>
+                     <span class="white-text">
+                         Not Registered yet? <a class="white-text" href={{ url_for('users.register')}}>Register Here</a>
+                     </span>
+                </div>
+                <br><br>
+                <div>
+                    <h4 class="white-text"> Just want to explore? </h4>
+                    <span class="white-text">username: demo@demo.com<br>password: demo</span>
+                </div>
+        </div>
+
+    </div>
+
+
+    <div class="row">
+        <br><br>
+    </div>
+
+
+    <div class="row">
+
+        <div class='col-lg-4 d-flex align-items-stretch'>
+            <div class="card bg-transparent text-white border-light">
+              <div class="card-header text-white" style="border-bottom: 1px solid white;">
+                Portfolio NAV tracking&nbsp;&nbsp;<i class="fas fa-chart-line"></i>
+              </div>
+              <div class="card-body text-white">
+                <h5 class="card-title text-white">Better performance tracking</h5>
+                <p class="card-text  text-justify text-white">NAV is particularly important when #stackingsats - it tracks performance relative
+                to current capital allocated.<br><br> <span class='text-white'> A portfolio going from $100 to $200 may seem like it 2x
+                but the performance really depends wether capital was invested or divested during
+                this period. NAV adjusts for cash inflows and outflows.</span></p>
+              </div>
+            </div>
+        </div>
+
+        <div class='col-lg-4 d-flex align-items-stretch'>
+            <div class="card bg-transparent text-white border-light">
+              <div class="card-header text-white" style="border-bottom: 1px solid white;">
+                Double Entry Accounting&nbsp;&nbsp;<i class="fas fa-check-double"></i>
+              </div>
+              <div class="card-body text-white">
+                <h5 class="card-title text-white">Better cost basis monitoring</h5>
+                <p class="card-text  text-justify">Cryptoblotter is structured so most trades are included in pairs. <br><br>
+                <span class='text-white'> This is similar
+                to accounting entries where credits and debits are included as separate entries.
+                This is helpful so you can track your positions (assets) and your cash flows.
+                By doing this, it's easier to see how much fiat was deployed. It's
+                particularly helpful in determining your historical average cost.</span></p>
+              </div>
+            </div>
+        </div>
+
+        <div class='col-lg-4 d-flex align-items-stretch'>
+            <div class="card bg-transparent text-white border-light">
+              <div class="card-header text-white" style="border-bottom: 1px solid white;">
+                Open Source Code&nbsp;&nbsp;<i class="fas fa-box-open"></i>
+              </div>
+              <div class="card-body text-white ">
+                <h5 class="card-title text-white">Transparency & Privacy</h5>
+                <p class="card-text  text-justify">The source code is full open source for review and
+                    modifications (personal use only).<br><br> <span class='text-white'> You are actually encouraged to
+                    run the code locally in your computer to reduce the risk of data mining of your information.</span></p>
+              </div>
+            </div>
+        </div>
+        <div class='col-lg-1'>
+        </div>
+    </div>
+</div>
+
+
+<br><br><br><br><br>
+
+{% endblock content %}

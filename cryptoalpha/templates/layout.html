@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<html>
+    <link rel="icon" href="static/images/favicon-bitcoin.ico" class="invert">
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+
+    {% if title %}
+        <title>CryptoBlotter | {{ title }}</title>
+    {% else %}
+        <title>CryptoBlotter</title>
+    {% endif %}
+</head>
+
+<body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container max-width">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+
+        <div class="collapse navbar-collapse" id="navbarToggle">
+            <div class="navbar-nav mr-auto">
+
+                <li class="nav-item dropdown">
+                    <a class="navbar-brand" href="/">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Account Tools</a>
+                    <div class="dropdown-menu">
+                         <a class="dropdown-item" href="{{ url_for('main.importcsv') }}"><i class="fas fa-file-import"></i>&nbsp;&nbsp;Import CSV file</a>
+                         <a class="dropdown-item" href="{{ url_for('main.csvtemplate') }}"><i class="fas fa-book"></i>&nbsp;&nbsp;CSV file instructions</a>
+                         <a class="dropdown-item" id="downloadcsv" href="{{ url_for('main.exportcsv') }}"><i class="fas fa-download"></i>&nbsp;&nbsp;Download all your transactions in CSV</a>
+                         <div class="dropdown-divider"></div>
+                         <a class="dropdown-item" href="{{ url_for('users.account') }}"><i class="fas fa-users-cog"></i>&nbsp;&nbsp;Manage User Account</a>
+                         <div class="dropdown-divider"></div>
+                         <a class="dropdown-item" href="{{ url_for('main.about') }}"><i class="fab fa-bitcoin"></i>&nbsp;&nbsp;About CryptoBlotter</a>
+                   </div>
+                 </li>
+                 <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+
+                 <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Portfolio Actions</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{{ url_for('transactions.list_transactions') }}"><i class="fas fa-list"></i>&nbsp;&nbsp;List Transactions</a>
+                        <a class="dropdown-item" href="{{ url_for('transactions.newtrade') }}"><i class="fas fa-plus-square"></i>&nbsp;&nbsp;Include New Transaction</a>
+                        <a class="dropdown-item" href="{{ url_for('transactions.account_positions') }}"><i class="fas fa-key"></i>&nbsp;&nbsp;Custody List</a>
+                    </div>
+                </li>
+                <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+
+
+                 <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Portfolio Analysis</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{{ url_for('main.home') }}"><i class="fas fa-home"></i>&nbsp;&nbsp;Overview</a>
+                        <a class="dropdown-item" href="{{ url_for('portfolio.navchart') }}"><i class="fas fa-chart-area"></i>&nbsp;&nbsp;Portfolio Historical Chart</a>
+                        <a class="dropdown-item" href="{{ url_for('portfolio.portfolio_compare') }}"><i class="fas fa-check-double"></i>&nbsp;&nbsp;Compare Portfolio Performance</a>
+                        <a class="dropdown-item" href="{{ url_for('portfolio.volchart') }}"><i class="fas fa-cloud-sun-rain"></i>&nbsp;&nbsp;Historical Volatility Chart</a>
+                        <a class="dropdown-item" href="{{ url_for('portfolio.heatmap') }}"><i class="fas fa-fire-extinguisher"></i>&nbsp;&nbsp;Monthly HeatMap</a>
+                    </div>
+                </li>
+                <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+
+                <li class="nav-item dropdown">
+                   <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Other Tools</a>
+                   <div class="dropdown-menu">
+                       <a class="dropdown-item" href="https://hodlcalculator.herokuapp.com/" target="_blank"><i class="fas fa-calculator"></i>&nbsp;&nbsp;HODL Calulator&nbsp;<i class="fas  fa-xs fa-external-link-alt"></i></a>
+                   </div>
+               </li>
+
+            {% endif %}
+
+            </div>
+        </div>
+
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+                {% if current_user.is_authenticated %}
+                <a class="nav-item nav-link" href="{{ url_for('users.account') }}">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+
+                    <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                {% else %}
+                    <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Login</a>
+                    <a class="nav-item nav-link" href="{{ url_for('users.register') }}">Register</a>
+                {% endif %}
+            </div>
+
+        </div>
+
+      </nav>
+    </header>
+
+
+    <main role="main" class="container max-width">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- http://jquery.com/ & jQuery UI -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+
+    <script
+      src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous">
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/flick/jquery-ui.css"
+    <br><br><br>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <br><br>
+                <div id="messagealert" class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+    <br>
+          {% block content %}{% endblock %}
+    <br>
+    <!-- Footer -->
+    <footer class="site-footer bg-steel small fixed-bottom">
+        <div class="container text-right text-light">
+        </br>
+        <i class="fab fa-bitcoin"></i> #StackingSats #NotYourKeysNotYourCoins
+    </br></br>
+        </div>
+    </footer>
+  </main>
+</body>
+</html>

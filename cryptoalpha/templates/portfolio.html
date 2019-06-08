@@ -1,0 +1,726 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- JQuery -->
+<script
+  src="https://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+
+<!--  High Charts -->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="static/highcharts.js"></script>
+
+<script>
+  var piechartjs = {{pie_data|tojson|safe}};
+</script>
+
+<div class="row">
+
+    <!-- Start of left side column with positions, etc -->
+    <div class="col-sm-8">
+        <table id="portfoliosummary" class="table-condensed">
+
+            <tbody>
+                <tr>
+                    <td id="pvalue" class="border-bottom hinumber">
+                        $ {{"{:,.0f}".format(portfolio_data.TOTAL.usd_position)}}
+                    </td>
+                    <td></td>
+                    <td id="pvaluebtc" class="border-bottom hinumber">
+                        &#8383 {{"{:,.4f}".format(portfolio_data.TOTAL.btc_position)}}
+                    </td>
+                    <td></td>
+                    <td id="chg1" class="redgreen border-bottom hinumber text-right">
+                        {{"{:+,.2f}".format(portfolio_data.TOTAL.chg_perc_24h)}}%
+
+                    </td>
+                    <td></td>
+                    <td id="chg2" class="redgreen border-bottom hinumber text-right">
+                        $ {{"{:+,.0f}".format(portfolio_data.TOTAL.chg_usd_24h)}}
+
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="small">
+                        portfolio value
+                    </td>
+                    <td></td>
+                    <td class="small">
+                        portfolio value
+                    </td>
+                    <td></td>
+                    <td class="small text-right">
+                        day change
+                    </td>
+                    <td></td>
+                    <td class="small text-right">
+                        day change
+
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Portfolio Summary Bar at top -->
+    <div class="col-sm-4 align-right">
+        <table id="time" class="table-condensed table-right text-right">
+            <tbody>
+                <tr>
+
+                    <td id='latest_btc_block' class="text-left border-bottom hinumbersmall">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img>
+                    </td>
+
+                    <td id="lstupd" class="border-bottom hinumbersmall text-right">
+                        <span>
+                        {{(portfolio_data.TOTAL.refresh_time.strftime('%Y-%m-%d, %I:%M %p'))}}
+                        </span>
+                        <button class="btn btn-clean" onClick="window.location.reload();">
+                        <i class="fas fa-sync-alt" onClick="window.location.reload();"></i>
+                        </button>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td class="small text-left">
+                        &#8383 Block Height
+                    </td>
+
+                    <td class="small text-right">
+                        last update
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</br>
+
+
+<div class="row">
+
+        <div class="col-sm-8">
+
+        <!-- START Portfolio Snapshot section  -->
+            <div class="content-section">
+                    <div class="row">
+                    <div class="col-sm-6">
+                        <div class="lead">Portfolio Snapshot</div>
+                    </div>
+
+
+                </div>
+
+                <table id="positionstable" class="table table-sm small-text">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">
+                                Ticker
+                            </th>
+
+                            <th class="text-right">
+                                Quantity
+                            </th>
+
+                            <th class="text-right">
+                                Latest Price (USD)
+                            </th>
+
+                            <th class="text-right small">
+                                24hr Chg
+                            </th>
+                            <th>
+
+                            </th>
+                            <th class="text-right">
+                                Position (USD)
+                            </th>
+                            <th class="text-right small">
+                                % of total
+                            </th>
+
+
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="portfolio">
+                        {% for position in portfolio_data %}
+
+                            {% if position != "TOTAL" %}
+
+                                {% if portfolio_data[position]['small_pos']== 'False' %}
+                                    <tr id="ticker{{position}}">
+                                {% else %}
+                                    <tr id="ticker{{position}}" class="small_pos">
+                                {% endif %}
+
+                                    <th class="align-middle" scope="row">{{position}}</th>
+
+                                <td class="text-right align-middle">
+                                    {{"{:,.4f}".format(portfolio_data[position]['position'])}}
+
+                                </td>
+
+                                <td class="text-right align-middle">
+                                    ${{"{:,.2f}".format(portfolio_data[position]['usd_price_data']['PRICE'])}}
+                                </td>
+
+                                <td class="text-right small align-middle redgreen">
+                                    {{"{:+,.2f}".format(portfolio_data[position]['chg_pct_24h'])}}%
+                                    {% if (portfolio_data[position]['chg_pct_24h'] >= 0) %}
+                                            <img src="static/images/btc_up.png" width="10" height="10"></img>
+                                        {% else %}
+                                            <img src="static/images/btc_down.png" width="10" height="10"></img>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center align-middle">
+
+                                </td>
+
+                                <td class="text-right align-middle">
+                                    ${{"{:,.0f}".format(portfolio_data[position]['usd_position'])}}
+                                </td>
+
+                                <td class="text-right small align-middle">
+                                    {{"{:,.2f}".format(portfolio_data[position]['usd_perc']*100)}}%
+                                </td>
+
+
+
+                                </tr>
+
+                            {% endif %}
+                        {% endfor %}
+
+
+                    </tbody>
+                </table>
+            </div>
+        <!-- END Portfolio Snapshot section  -->
+
+
+        <!-- START Cost Analysis section -->
+            <div class="content-section">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div id="cost_title" class="lead">Cost Analysis</div>
+                    </div>
+
+                    <div class="col-sm-6 text-right">
+                        <span id="acc_method" class="small text-secondary text-right">
+                            Method: FIFO (First-in First-Out)
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <span class="fifo_costtable">
+                    <table  id="fifo_costtable" class="table table-sm small-text">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">
+                                    Ticker
+                                </th>
+
+                                <th class="text-right">
+                                    Position
+                                </th>
+
+                                <th class="text-right">
+                                    Realised PnL
+                                </th>
+
+                                <th class="text-right">
+                                    Unr. PnL
+                                </th>
+                                <th class="text-right small">
+                                    Unr. Breakeven
+                                </th>
+
+
+                                <th class="text-right">
+                                    Fees
+                                </th>
+                                <th class="text-right">
+                                    Total PnL
+                                </th>
+                                <th class="text-right">
+                                    Breakeven
+                                </th>
+
+
+
+                            </tr>
+                        </thead>
+
+                        <tbody id="portfolio">
+                            {% for position in portfolio_data %}
+
+                                {% if position != "TOTAL" %}
+
+                                {% if portfolio_data[position]['small_pos']== 'False' %}
+                                    <tr id="ticker{{position}}">
+                                {% else %}
+                                    <tr id="ticker{{position}}" class="small_pos">
+                                {% endif %}
+
+                                        <th class="align-middle">{{position}}</th>
+
+                                    <td class="text-right align-middle">
+                                            $ {{"{:,.0f}".format(portfolio_data[position]['usd_position'])}}
+
+                                    </td>
+
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['LIFO']['realized_pnl'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['LIFO']['unrealized_pnl'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle small">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['LIFO']['unrealized_be'])}}
+                                    </td>
+
+
+                                    <td class="text-right align-middle">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['total_fees'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['total_pnl_net_USD'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['breakeven'])}}
+                                    </td>
+
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+
+                            <tr id="tickerTOTAL" class="table-dark">
+                                <th class="align-middle" scope="row">TOTAL</th>
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL']['usd_position'])}}
+
+                            </td>
+
+                            <td class="text-right align-middle">
+
+                            </td>
+
+                            <td class="text-right small align-middle redgreen">
+                            </td>
+
+                            <td class="text-right small align-middle redgreen">
+                            </td>
+
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL'].trade_fees)}}
+                            </td>
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL'].total_pnl_net_USD)}}
+                            </td>
+
+                            <td class="text-right small align-middle">
+
+                            </td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </span>
+
+                <span class="lifo_costtable">
+                    <table  id="lifo_costtable" class="table table-sm small-text">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">
+                                    Ticker
+                                </th>
+
+                                <th class="text-right">
+                                    Position
+                                </th>
+
+                                <th class="text-right">
+                                    Realised PnL
+                                </th>
+
+                                <th class="text-right">
+                                    Unr. PnL
+                                </th>
+                                <th class="text-right small">
+                                    Unr. Breakeven
+                                </th>
+
+                                <th class="text-right">
+                                    Fees
+                                </th>
+                                <th class="text-right">
+                                    Total PnL
+                                </th>
+                                <th class="text-right">
+                                    Breakeven
+                                </th>
+
+
+
+                            </tr>
+                        </thead>
+
+                        <tbody id="portfolio">
+                            {% for position in portfolio_data %}
+
+                                {% if position != "TOTAL" %}
+
+                                {% if portfolio_data[position]['small_pos']== 'False' %}
+                                    <tr id="ticker{{position}}">
+                                {% else %}
+                                    <tr id="ticker{{position}}" class="small_pos">
+                                {% endif %}
+
+                                        <th class="align-middle">{{position}}</th>
+
+                                    <td class="text-right align-middle">
+                                            $ {{"{:,.0f}".format(portfolio_data[position]['usd_position'])}}
+
+                                    </td>
+
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['FIFO']['realized_pnl'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['FIFO']['unrealized_pnl'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle small">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['cost_matrix']['FIFO']['unrealized_be'])}}
+                                    </td>
+
+
+                                    <td class="text-right align-middle">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['total_fees'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle redgreen">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['total_pnl_net_USD'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle">
+                                        $ {{"{:,.0f}".format(portfolio_data[position]['breakeven'])}}
+                                    </td>
+
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+
+                            <tr id="tickerTOTAL" class="table-dark">
+                                <th class="align-middle" scope="row">TOTAL</th>
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL']['usd_position'])}}
+
+                            </td>
+
+                            <td class="text-right align-middle">
+
+                            </td>
+
+                            <td class="text-right small align-middle redgreen">
+                            </td>
+
+                            <td class="text-right small align-middle redgreen">
+                            </td>
+
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL'].trade_fees)}}
+                            </td>
+
+                            <td class="text-right align-middle">
+                                    $ {{"{:,.0f}".format(portfolio_data['TOTAL'].total_pnl_net_USD)}}
+                            </td>
+
+                            <td class="text-right small align-middle">
+
+                            </td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </span>
+
+
+            </div>
+        <!-- END Cost Analysis Section -->
+
+        <!-- START Market Data Section -->
+            <div class="content-section">
+                <div class="lead">Market Data</div>
+                <table  id="marketdatatable" class="table table-sm small-text">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">
+                                Ticker
+                            </th>
+
+                            <th class="text-right">
+                                Price ($)
+                            </th>
+
+                            <th class="text-right small">
+                                24hr Chg
+                            </th>
+
+                            <th class="text-right small">
+                                24hr Volume
+                            </th>
+                            <th class="text-center small">
+                                24hr Price Range
+                            </th>
+
+                            <th class="text-right small">
+                                Mkt Cap
+                            </th>
+
+                            <th class="text-right small">
+                                Last Update
+                            </th>
+
+                            <th class="text-right small">
+                                Source
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="portfolio">
+                        {% for position in portfolio_data %}
+
+                            {% if position != "TOTAL" %}
+
+                                {% if portfolio_data[position]['small_pos']== 'False' %}
+                                    <tr id="ticker{{position}}">
+                                {% else %}
+                                    <tr id="ticker{{position}}" class="small_pos">
+                                {% endif %}
+
+                                    <th class="align-middle" scope="row">
+                                        {{position}}
+                                    </th>
+
+                                    <td class="text-right align-middle">
+                                        ${{"{:,.2f}".format(portfolio_data[position]['usd_price_data']['PRICE'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle small redgreen">
+                                        {{"{:+,.2f}".format(portfolio_data[position]['usd_price_data']['CHANGEPCT24HOUR'])}}%
+                                            {% if (portfolio_data[position]['usd_price_data']['CHANGEPCT24HOUR'] >= 0) %}
+                                                    <img src="static/images/btc_up.png" width="15" height="15"></img>
+                                                {% else %}
+                                                    <img src="static/images/btc_down.png" width="15" height="15"></img>
+                                            {% endif %}
+                                    </td>
+
+                                    <td class="text-right align-middle small">
+                                        {{"{:,.0f}".format(portfolio_data[position]['usd_price_data']['VOLUMEDAY'])}} {{position}}
+                                    </td>
+
+                                    <td class="text-center small">
+                                        ${{"{:,.2f}".format(portfolio_data[position]['usd_price_data']['LOWDAY'])}}</br>
+                                        ${{"{:,.2f}".format(portfolio_data[position]['usd_price_data']['HIGHDAY'])}}
+                                    </td>
+
+                                    <td class="text-right align-middle small">
+                                        ${{"{:,.2f}".format(portfolio_data[position]['usd_price_data']['MKTCAP']/1000000000)}} B
+                                    </td>
+
+                                    <td class="text-right align-middle small">
+
+                                        {{portfolio_data[position]['usd_price_data']['LASTUPDATE']}} UTC
+                                    </td>
+
+
+                                    <td class="text-right align-middle small">
+                                        {{portfolio_data[position]['usd_price_data']['LASTMARKET']}}
+                                    </td>
+
+
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+
+
+                    </tbody>
+                </table>
+            </div>
+        <!-- END Market Data Section -->
+        <!-- START charts -->
+            <div class="row">
+                <div class="col-sm-4">
+                    <!-- Asset Allocation Chart -->
+                    <div id="piechart" style="height: 250px">
+                        <span class="loadanim">&nbsp;GENERATING CHARTS...</span>
+                    </div>
+                </div>
+                <div class"col-sm-8">
+                    <!-- NAV Chart -->
+                    <div id="navchart" style="min-width: 500px; height: 300px; margin: 0 auto">
+
+                    </div>
+                </div>
+            </div>
+        <!-- END Charts -->
+        </br>
+        </br>
+        </div>
+
+
+    <div class="col-sm-4">
+        <!-- START Portfolio Statistics section -->
+
+        <div class="content-section">
+
+                <span class="lead">Summary Stats </span></br>
+                <span id='stats_dates_txt' class="small text-muted"></span>
+
+                <table id="positionstable" class="table table-sm small-text">
+                    <tbody>
+                        <tr>
+                            <td>Current NAV</td>
+                            <td id='end_nav' class="text-right"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Highest NAV</td>
+                            <td id='max_nav' class="text-right"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Lowest NAV</td>
+                            <td id='min_nav' class="text-right"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Portfolio Value</td>
+                            <td id='end_portvalue' class="text-right"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Highest Value</td>
+                            <td id='max_portvalue' class="text-right"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+
+
+                        <tr>
+                            <th colspan="2">NAV Returns</th>
+                        </tr>
+
+                        <tr>
+                            <td>Since last 'close'</td>
+                            <td id='return_1d' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>1 week</td>
+                            <td id='return_1wk' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>30 days</td>
+                            <td id='return_30d' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>90 days</td>
+                            <td id='return_90d' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Since ATH</td>
+                            <td id='return_ATH' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+                        <tr>
+                            <td>Since inception</td>
+                            <td id='return_SI' class="text-right redgreen"> <img class="mx-auto d-block" src="static/images/loading3.gif" width="15" height="15"></img> </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+        </div>
+
+        <!-- END Portfolio Statistics section -->
+        <!-- START setting section -->
+        <div class="content-section">
+                <p class="lead">
+                    <i class="fas fa-sliders-h"></i>
+                    &nbsp;Display Settings
+
+                </p>
+
+                <!-- Option: Small Positions -->
+                <div class="row small">
+                    <div class="col-sm-8 text-left align-middle">
+                        Show small + closed positions
+                    </div>
+                    <div class="col-sm-4 align-middle">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch">
+                            <label class="onoffswitch-label" for="myonoffswitch">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Option: LIFO FIFO -->
+                <div class="row small">
+                    <div class="col-sm-8 text-left align-middle">
+                        PnL accounting
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="fifolifoswitch align-middle">
+                            <input type="checkbox" name="fifolifoswitch" class="fifolifoswitch-checkbox" id="myfifolifoswitch">
+                            <label class="fifolifoswitch-label" for="myfifolifoswitch">
+                                <span class="fifolifoswitch-inner"></span>
+                                <span class="fifolifoswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+        </div>
+        <!-- END Settings Section -->
+
+
+    </div>
+</div>
+</br>
+
+
+<script src="/static/portfolio.js"></script>
+
+
+{% endblock content %}

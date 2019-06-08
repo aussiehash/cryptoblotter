@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <div class="content-section">
+        <form method="POST" action="">
+            <!-- Important to include the below for added security -->
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Contact Form</legend>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+                    {{ form.email(class="form-control form-control-lg") }}
+
+                </div>
+
+                <div class="form-group">
+                    {{ form.message.label(class="form-control-label") }}
+                    {{ form.message(class="form-control form-control-lg") }}
+                </div>
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </form>
+    </div>
+
+{% endblock content %}

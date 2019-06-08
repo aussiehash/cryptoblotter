@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<!-- Datatables.net CDN -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<!--  High Charts -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="static/highcharts.js"></script>
+
+<script>
+  var chartjs = {{chartdata|tojson|safe}};
+  var phistoryjs = {{phistory|safe}}
+</script>
+
+
+<div class="input-group mb-3">
+
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon1">Normalize returns to: </span>
+  </div>
+  <input type="text" class="form-control" placeholder="USD" aria-label="USD" aria-describedby="basic-addon1">
+  </div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+                <div id="navchart" style="min-width: 310px; height: 400px; margin: 0 auto">
+                </div>
+
+        </div>
+    </div>
+</div>
+</br>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+                <div id="portchart" style="min-width: 310px; height: 400px; margin: 0 auto">
+                </div>
+
+        </div>
+    </div>
+</div>
+
+</br>
+
+
+<div class="container">
+    <div class="row">
+
+            <div class="col-sm-12">
+
+                {{datatable | safe}}
+
+            </div>
+
+    </div>
+
+</br></br>
+    <small>
+        Prices provided by <a href="#">Alphavantage</a>. Pricing available from 2014 forward. </br>
+
+    </small>
+
+</div>
+
+<script src="/static/phist.js"></script>
+
+{% endblock content %}

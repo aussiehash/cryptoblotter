@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <div class="content-section">
+        <form method="POST" action="">
+            <!-- Important to include the below for added security -->
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Register a new Account</legend>
+                <p class='text-info'><i class="fas fa-key"></i>&nbsp;You are encouraged to use a random username and e-mail address<p>
+                <p class='text-muted'>There is no e-mail verification process, but if you provide an e-mail
+                    address it can be used to recover your password (maybe use a burner).</p>
+                    <h6 class='text-muted'>If an e-mail is not provided please make sure
+                    to remember your username and password.</h6>
+                    <h6 class='text-muted'>Otherwise it cannot be recovered</h6>
+                <div class="form-group">
+                    {{ form.username.label(class="form-control-label") }}
+
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+
+                    {% if form.email.errors %}
+                       {{ form.email(class="form-control form-control-lg is-invalid") }}
+                       <div class="invalid-feedback">
+                           {% for error in form.email.errors %}
+                               <span>{{ error }}</span>
+                           {% endfor %}
+                       </div>
+                   {% else %}
+                       {{ form.email(class="form-control form-control-lg") }}
+                   {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-control-label") }}
+
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.password(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.confirm_password.label(class="form-control-label") }}
+                    {% if form.confirm_password.errors %}
+                       {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+                       <div class="invalid-feedback">
+                           {% for error in form.confirm_password.errors %}
+                               <span>{{ error }}</span>
+                           {% endfor %}
+                       </div>
+                   {% else %}
+                       {{ form.confirm_password(class="form-control form-control-lg") }}
+                   {% endif %}
+
+                </div>
+
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </form>
+    </div>
+
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            Already Have an Account? <a class="ml-2" href="{{ url_for('users.login')}}">Log In</a>
+        </small>
+    </div>
+{% endblock content %}

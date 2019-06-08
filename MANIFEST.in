@@ -1,0 +1,8 @@
+recursive-include cryptoalpha/templates *
+recursive-include cryptoalpha/static *
+recursive-include cryptoalpha/api *
+recursive-include cryptoalpha/errors *
+recursive-include cryptoalpha/main *
+recursive-include cryptoalpha/portfolio *
+recursive-include cryptoalpha/transactions *
+recursive-include cryptoalpha/users *

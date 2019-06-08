@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <div class="content-section">
+
+        <form method="POST" action="" enctype="multipart/form-data" id="newtradeform">
+            <!-- Important to include the below for added security -->
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+
+                <legend class="border-bottom mb-4">Include New Transaction</legend>
+
+                <div class="form-group" id="trade_date">
+
+                    {{ form.trade_date.label(class="form-control-label") }}
+                    {{ form.trade_date(class="form-control form-control-sm")}}
+
+                </div>
+
+                <div class="form-group" id="trade_type_div">
+
+                    {{ form.trade_type.label(class="form-control-label")}}
+
+
+                    {{ form.trade_type(class="form-control form-control-sm", id="trade_select")}}
+                    <small class="form-text text-info" id="transdesc">PLEASE CHOOSE AN OPTION</small>
+
+                </div>
+
+
+                <div class="form-group" id="trade_asset_ticker">
+                      {{ form.trade_asset_ticker.label(class="form-control-label") }}
+
+                      {% if form.trade_asset_ticker.errors %}
+                          {{ form.trade_asset_ticker(class="form-control form-control-lg ui-widget is-invalid", id="tickerauto") }}
+                          <div class="invalid-feedback">
+                              {% for error in form.trade_asset_ticker.errors %}
+                                  <span>{{ error }}</span>
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          {{ form.trade_asset_ticker(class="form-control form-control-lg ui-widget", id="tickerauto") }}
+                      {% endif %}
+
+                      <small class="form-text text-muted"><a href={{url_for('api.cryptolist')}}>Click here for full list</a></small>
+                  </div>
+
+                  <div class="form-group" id="trade_operation">
+
+                      {{ form.trade_operation.label(class="form-control-label") }}
+                      {{ form.trade_operation(class="form-control form-control-sm", id="BSDW")}}
+
+                  </div>
+
+                  <div class="form-group" id="trade_quantity">
+                      {{ form.trade_quantity.label(class="form-control-label") }}
+
+                      {% if form.trade_quantity.errors %}
+                          {{ form.trade_quantity(class="form-control form-control-sm is-invalid") }}
+                          <div class="invalid-feedback">
+                              {% for error in form.trade_quantity.errors %}
+                                  <span>{{ error }}</span>
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          {{ form.trade_quantity(class="form-control form-control-sm", autocomplete="off", id="quant") }}
+                      {% endif %}
+
+                  </div>
+
+                  <div class="form-group" id="trade_price">
+
+                      {{ form.trade_price.label(class="form-control-label") }}
+                      {{ form.trade_price(class="form-control form-control-sm", autocomplete="off", id="price")}}
+
+                  </div>
+
+                  <div class="form-group" id="trade_fees">
+
+                      {{ form.trade_fees.label(class="form-control-label") }}
+                      {{ form.trade_fees(class="form-control form-control-sm", autocomplete="off", id="fees")}}
+
+                  </div>
+
+                  <div class="form-group" id="cash_value">
+
+                      {{ form.cash_value.label(class="form-control-label") }}
+                      {{ form.cash_value(class="form-control form-control-sm", id="cash", readonly=true)}}
+
+                  </div>
+
+                  <div class="form-group" id="trade_account">
+
+                      {{ form.trade_account.label(class="form-control-label") }}
+
+                      {% if form.trade_account.errors %}
+                          {{ form.trade_account(class="form-control form-control-sm is-invalid", id="tradeaccount") }}
+                           <small class="form-text text-muted">This is the account where your Crypto is held</small>
+                          <div class="invalid-feedback">
+                              {% for error in form.trade_account.errors %}
+                                  <span>{{ error }}</span>
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          {{ form.trade_account(class="form-control form-control-sm", id="tradeaccount") }}
+                          <small class="form-text text-muted">This is the account where your Crypto is held</small>
+                      {% endif %}
+
+                  </div>
+
+                  <div class="form-group" id="cash_account">
+                      {{ form.cash_account.label(class="form-control-label") }}
+                      {% if form.cash_account.errors %}
+                          {{ form.cash_account(class="form-control form-control-sm is-invalid", id="cashaccount") }}
+                            <small class="form-text text-muted">This is the account where your cash is held - i.e. if Buying Crypto, this account will be debited</small>
+                          <div class="invalid-feedback">
+                              {% for error in form.cash_account.errors %}
+                                  <span>{{ error }}</span>
+                              {% endfor %}
+                          </div>
+                      {% else %}
+                          {{ form.cash_account(class="form-control form-control-sm", id="cashaccount") }}
+                        <small class="form-text text-muted">This is the account where your cash is held - i.e. if Buying Crypto, this account will be debited</small>
+                      {% endif %}
+                  </div>
+
+
+
+                  <div class="form-group" id="trade_notes">
+
+                      {{ form.trade_notes.label(class="form-control-label") }}
+                      {{ form.trade_notes(class="form-control form-control-sm", autocomplete="off")}}
+                      <small class="form-text text-muted">Use this field to include any notes or tags to help you identify or classify this transaction</small>
+
+                  </div>
+
+
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info", id="submit_button")}}
+
+
+            </div>
+
+        </form>
+
+            {% for field in form.errors %}
+                {% for error in form.errors[field] %}
+                    <div class="error text-danger">FORM ERROR: {{ error }} on field: {{field}}</div>
+                {% endfor %}
+            {% endfor %}
+
+    </div>
+<!-- app's own JavaScript -->
+<script src="/static/newtrade.js"></script>
+
+{% endblock content %}

@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<body class="bg-main">
+
+    <div class="content-section">
+
+      <div class="media">
+        <img class="rounded-circle account-img" src={{ image_file }}>
+        <div class="media-body">
+          <h2 class="account-heading">{{ current_user.username }}</h2>
+          <p class="text-secondary">{{ current_user.email }}</p>
+        </div>
+      </div>
+
+
+              <form method="POST" action="" enctype="multipart/form-data">
+                  {{ form.hidden_tag() }}
+                  <fieldset class ="form-group">
+
+                <legend class ="border-bottom mb-4">Account Info | CryptoBlotter</legend>
+
+
+                      <div class="form-group">
+                          {{ form.email.label(class="form-control-label") }}
+                          {% if form.email.errors %}
+                              {{ form.email(class="form-control form-control-lg is-invalid") }}
+                              <div class="invalid-feedback">
+                                  {% for error in form.email.errors %}
+                                      <span>{{ error }}</span>
+                                  {% endfor %}
+                              </div>
+                          {% else %}
+                              {{ form.email(class="form-control form-control-lg") }}
+                          {% endif %}
+                      </div>
+
+
+                      <div class="form-group">
+                          {{ form.picture.label() }}
+                          {{ form.picture(class="form-control-file") }}
+                          {% if form.picture.errors %}
+                            {% for error in form.picture.errors %}
+                             <span class="text-danger">{{ error }}</span></br>
+                             {% endfor %}
+                          {% endif %}
+                      </div>
+
+                      <div class="form-group">
+                          {{ form.submit(class="btn btn-outline-info")}}
+                      </div>
+
+                  </fieldset>
+              </form>
+
+
+
+
+    </div>
+
+    <div class="content-section">
+        <span class="text-danger">Delete all transactions from Database (no UNDO)</span></br>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="type DELETE to confirm" id="DELETE">
+        </div>
+
+        <a href="\delalltrades">
+        <button type="button" id="DELETEBUTTON" class="btn btn-outline-danger" disabled="true">
+            DELETE ALL TRADES</button>
+        </a>
+    </div>
+
+    <!-- app's own JavaScript -->
+    <script src="/static/account.js"></script>
+
+
+
+</body>
+
+{% endblock content %}

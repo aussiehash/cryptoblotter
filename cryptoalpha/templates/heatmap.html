@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<!--  High Charts -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="static/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+
+<div class="container-fluid">
+    <div class="content-section">
+        <p class="lead">Monthly Returns HeatMap</p>
+        <table class="table small">
+            <thead class="thead-light">
+                <tr class="table-active">
+                    <th></th>
+                    {% for col in cols %}
+                        <th class="text-center">
+                            {%if col == 'eoy' %}
+                                Year
+                            {% else %}
+                                {{col}}
+                            {% endif %}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                    {% for year in years | reverse %}
+                    <tr>
+                        <th class="table-active">{{year}}</th>
+                        {% for col in cols %}
+                            {% if col=='eoy' %}
+                                <td class='text-right table-secondary redgreen'>
+                                    {{"{:,.1f}".format(heatmap[col][year]*100)}}%
+                            {% else %}
+                                    {% if heatmap[col][year] != 0 %}
+                                    <td class='text-right heatmap'>
+                                        {{"{:,.1f}".format(heatmap[col][year]*100)}}%
+                                    {% else %}
+                                    <td class='text-center emptycell'>
+
+                                    {% endif %}
+                            {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="container-fluid">
+    <div class="content-section">
+        <p class="lead">Monthly Returns Statistics</p>
+        <table class="table small">
+            <thead class="thead-light">
+                <tr class="table-active">
+                    <th></th>
+                        <th class="text-center">
+                            Year Return
+                        </th>
+                        <th class="text-center">
+                            Best Month
+                        </th>
+                        <th class="text-center">
+                            Worst Month
+                        </th>
+                        <th class="text-center">
+                            Positive Months
+                        </th>
+                        <th class="text-center">
+                            Negative Months
+                        </th>
+                        <th class="text-center">
+                            Average Positive Month
+                        </th>
+                        <th class="text-center">
+                            Average Negative Month
+                        </th>
+                        <th class="text-center">
+                            Average Monthly Return
+                        </th>
+                </tr>
+            </thead>
+            <tbody>
+                    {% for year in years | reverse %}
+                    <tr>
+                        <th class="table-active">{{year}}</th>
+                            <td class='text-center table-secondary redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['eoy'][year]*100)}}%
+                            </td>
+                            <td class='text-center redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['MAX'][year]*100)}}%
+                            </td>
+                            <td class='text-center redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['MIN'][year]*100)}}%
+                            </td>
+                            <td class='text-center table-secondary'>
+                                {{"{:,.0f}".format(heatmap_stats['POSITIVES'][year])}}
+                            </td>
+                            <td class='text-center table-secondary'>
+                                {{"{:,.0f}".format(heatmap_stats['NEGATIVES'][year])}}
+                            </td>
+                            <td class='text-center redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['POS_MEAN'][year]*100)}}%
+                            </td>
+                            <td class='text-center redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['NEG_MEAN'][year]*100)}}%
+                            </td>
+                            <td class='text-center table-secondary redgreen'>
+                                {{"{:,.1f}".format(heatmap_stats['MEAN'][year]*100)}}%
+                            </td>
+                    </tr>
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br>
+<br>
+<script src="/static/hmap.js"></script>
+
+
+{% endblock content %}

@@ -1,0 +1,304 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!--  High Charts -->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="static/highcharts.js"></script>
+
+
+<div class="container-fluid">
+
+    <div id="messagealert" class="alert alert-success collapse">
+    </div>
+
+    <div class="content-section">
+        <div class="row">
+            <div class='col-sm-8 text-left'>
+                <p class="lead">Accounts and Positions</br>
+            </div>
+            <div class='col-sm-4 text-right'>
+            <span class="text-muted small">#NotYourkeysNotYourCoins</span></p>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead class="thead-light">
+                <tr class="table-active">
+                    <th></th>
+                    {%for ticker in tickers%}
+                        {%if (ticker != 'USD')%}
+                            <th class='text-center'>{{ticker}}</th>
+                        {%endif%}
+                    {%endfor%}
+                </tr>
+            </thead>
+            <tbody>
+
+
+                {%for account in accounts%}
+                    <tr>
+                        <th>
+                            {{account}}
+                        </th>
+                        {%for ticker in tickers%}
+                            {%if (ticker != 'USD')%}
+                                <td class="text-center">
+                                    <!-- Only return values for positions that are available -->
+                                    {%if (account_table.trade_quantity[account][ticker]) %}
+                                        <!-- If position is too small, return dust -->
+                                        {%if ( (account_table.trade_quantity[account][ticker] < 0.0001) and
+                                                (account_table.trade_quantity[account][ticker] > -0.0001) )%}
+                                            <span   data-ticker='{{ticker}}'
+                                                    data-account='{{account}}'
+                                                    data-quant='{{account_table.trade_quantity[account][ticker]}}'
+                                                    data-dust='True'
+                                                class='dust editable small' onmouseover="" style="cursor: pointer;">
+                                                <span class='btn-link text-muted'>dust</span>
+                                            </span>
+                                        {%else%}
+                                        <span   data-ticker='{{ticker}}'
+                                                data-account='{{account}}'
+                                                data-quant='{{account_table.trade_quantity[account][ticker]}}'
+                                                data-dust='False'
+                                                class='not_dust editable' onmouseover="" style="cursor: pointer;">
+                                            <span class='btn-link'><strong>{{"{:,.4f}".format(account_table.trade_quantity[account][ticker])}}</strong></span>
+                                        </span>
+                                        {%endif%}
+                                    {%else%}
+                                    -
+                                    {%endif%}
+                                </td>
+                            {%endif%}
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+
+                <tr class='table-active'>
+                    <strong>
+                    <th>
+                        TOTAL
+                    </th>
+                    {%for ticker in tickers%}
+                        {%if (ticker != 'USD')%}
+                            <td class='text-center'>
+                                {%if ((account_table.sum(level=[1,1]).trade_quantity[ticker][0] < (0.0001)) and
+                                    (account_table.sum(level=[1,1]).trade_quantity[ticker][0] > (-0.0001)) )%}
+                                    <span class='small'>dust</span>
+                                {%else%}
+                                {{"{:,.4f}".format(account_table.sum(level=[1,1]).trade_quantity[ticker][0])}}
+                            {%endif%}
+                            </td>
+
+                        {%endif%}
+                    {%endfor%}
+                    </strong>
+                </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+<!-- Modal for Dust Positions -->
+<div class="modal fade" id="editDustModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" style="width:65%;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit Custody of Dust Position</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+            <div class='row'>
+                <div class='col-sm-2 align-self-center text-center'>
+                    <i class="fas fa-2x fa-broom"></i>
+                </div>
+                <div class='col-sm-10 align-top'>
+                    <h5>This position seems small and is considered dust</h5>
+                    <p>Currently, the account <span id='modal_account'></span> holds <span id='modal_quant'></span> of
+                    <span id='modal_ticker'></span></p>
+                </div>
+            </div>
+            <hr>
+
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <h4 class='text-left'>If you don't like dust laying around you can do a few things:</h4>
+                </div>
+            </div>
+            <br>
+
+            <div class='content-section align-right bg-light'>
+                <div class='row'>
+                    <div class='col-sm-10'>
+                        Delete this position
+                    </div>
+                    <div class='col-sm-2 text-right'>
+                        <button type="button" id="deleteDustButton" class="btn btn-outline-secondary btn-sm"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class='content-section align-middle bg-light'>
+                <div class='row align-middle'>
+                    <div class='col-sm-12'>
+                        Move this dust into another account
+                        <div class="input-group">
+                            <select class="custom-select" id="inputGroupSelectAccount">
+                                <option selected>Choose...</option>
+                                {%for account in all_accounts%}
+                                    <option value="{{account}}">{{account}}</option>
+                                {%endfor%}
+                            </select>
+
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="moveDustButton">Move</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class='content-section align-middle bg-light'>
+                <div class='row align-middle'>
+                    <div class='col-sm-12'>
+                        Adjust this position size to:
+
+                        <div class="input-group mb-3">
+                          <input id="dust_new_quant" type="text" class="form-control" value="0.00" aria-label="sizeAdjust" aria-describedby="sizeAdjustButton">
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="adjustDustButton">GO</button>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal for NOT Dust Positions -->
+<div class="modal fade" id="editNotDustModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" style="width:65%;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit Custody of Position</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+            <div class='row'>
+                <div class='col-sm-2 align-self-center text-center'>
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+                <div class='col-sm-10 align-top'>
+                    <h4>Currently, the account <span id='modal_nd_account'></span> holds<br> <span id='modal_nd_quant'></span> of
+                    <span id='modal_nd_ticker'></span></h4>
+                </div>
+            </div>
+            <hr>
+
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <h4 class='text-left'>Would you like to adjust this position?</h4>
+                </div>
+            </div>
+            <br>
+
+
+            <div class='content-section align-middle bg-light'>
+                <div class='row align-middle'>
+                    <div class='col-sm-12'>
+                        Move this position into another account
+                        <div class="input-group">
+                            <select class="custom-select" id="inputGroupSelectAccountND">
+                                <option selected>Choose...</option>
+                                {%for account in all_accounts%}
+                                    <option value="{{account}}">{{account}}</option>
+                                {%endfor%}
+                            </select>
+
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="moveNDButton">Move</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class='content-section align-middle bg-light'>
+                <div class='row align-middle'>
+                    <div class='col-sm-12'>
+                        Adjust this position size to:
+
+                        <div class="input-group mb-3">
+                          <input id="ND_new_quant" type="text" class="form-control" value="0.00" aria-label="sizeAdjust" aria-describedby="sizeAdjustButton">
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="adjustNDButton">GO</button>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Please Confirm</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <div id='confirmationText' class='lead'></div>
+      </div>
+      <div class="modal-footer">
+        <button id='confirmationNO' type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id='confirmationYES' type="button" class="btn btn-primary">Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</br></br>
+<script src="/static/account_positions.js"></script>
+
+
+{% endblock content %}

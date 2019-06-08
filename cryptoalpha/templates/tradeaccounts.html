@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block content %}
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous">
+</script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<div class="container">
+    <div class="row">
+
+            <div class="col-sm-8">
+                <table class="table table-striped align-middle table-hover">
+                    <thead>
+                        <tr>
+
+                            <th scope="col" colspan="2">
+                                <h6>Account Name</h6>
+                            </th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody id="transactions">
+                        {% for account in accounts %}
+
+                    <tr id="id{{account.id}}">
+
+                        <th class="align-middle text-left" scope="row">{{account.account_longname}}</td>
+
+                        <th class="text-right">
+                            <a href="/delacc?id={{account.account_id}}">
+                             <img src="static/images/trashcan.png" width="30" height="30" alt="DELETE">
+                             <span class="warning">DELETE</span> </a>
+                        </th>
+                        {% endfor %}
+
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-sm-4">
+
+                <h6>Add a new account to the list: </h6>
+
+
+                <form method="POST" action="" enctype="multipart/form-data">
+                    <!-- Important to include the below for added security -->
+                    {{ form.hidden_tag() }}
+                    <fieldset class="form-group">
+                        <div class="form-group">
+                            {{ form.account_name.label(class="form-control-label")}}
+                            {% if form.account_name.errors %}
+                                {{ form.account_name(class="form-control form-control-lg is-invalid ui-widget", id="accountauto") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.account_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                    {{ form.account_name(class="form-control form-control-sm ui-widget", id="tickerauto")}}
+                            {% endif %}
+                        </div>
+
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-outline-info")}}
+                    </div>
+                    </fieldset>
+                </form>
+            </div>
+
+
+    </div>
+</div>
+
+<!-- app's own JavaScript -->
+<script src="/static/tradeaccounts.js"></script>
+
+{% endblock content %}

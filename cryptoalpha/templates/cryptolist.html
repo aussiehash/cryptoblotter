@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<div class="row">
+    <div class="col-sm-10 col-md-10">
+        <div class="thumbnail">
+            <h4>
+                CryptoBlotter v.01 | List of available tickers
+
+            <img src="static/images/bitcoin-logo-gray.jpg" width="40" height="40" alt="Bitcoin">
+
+            </h4>
+            <small>
+                Source: <a href="http://www.coinmarketcap.com">CoinMarketCap</a>
+            </small>
+            <p></p>
+
+            <table id="myTable" class="table">
+
+            <div class="input-group mb-4"
+                <div class="input-group-prepend">
+                    <input class="form-control" type="text" id="myInput" onkeyup="searchTable()" placeholder="Search by Name">
+                </div>
+            </div>
+
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">Ticker</th>
+                  <th scope="col">Name</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+                  {% for item in listofcrypto %}
+                    <tr>
+                        <td>
+                            {{item.symbol}}
+                        </td>
+                        <td>
+                            {{item.name}}
+                        </td>
+                    </tr>
+                  {% endfor %}
+              </tbody>
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}

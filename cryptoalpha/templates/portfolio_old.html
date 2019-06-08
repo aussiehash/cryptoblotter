@@ -1,0 +1,513 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- http://jquery.com/ -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<!-- Datatables.net CDN -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<!-- High Charts CDN -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="static/highcharts.js"></script>
+
+<div id="storage" data-portfolio="0" class="caption">
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <h4>Portfolio Snapshot</h4>
+        <table id="portfoliosummary" class="table-condensed">
+
+            <tbody>
+                <tr>
+                    <td id="pvalue" class="border-bottom hinumber">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td></td>
+                    <td id="pvaluebtc" class="border-bottom hinumber">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td></td>
+                    <td id="chg1" class="redgreen border-bottom hinumber">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td></td>
+                    <td id="chg2" class="redgreen border-bottom hinumber">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td></td>
+                    <td id="lstupd" class="border-bottom hinumbersmall">
+                        <small><img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="small">
+                        portfolio value
+                    </td>
+                    <td></td>
+                    <td class="small">
+                        portfolio value
+                    </td>
+                    <td></td>
+                    <td class="small">
+                        day change
+                    </td>
+                    <td></td>
+                    <td class="small">
+                        day change
+                    </td>
+                    <td></td>
+                    <td class="small">
+                        last update
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+
+<div class="row">
+        <div class="col-sm-12">
+            <div class="form-check text-right">
+                <input type="checkbox" class="form-check-input" id="showsmall">
+                <label class="form-check-label" for="showsmall">Show small and closed positions</label>
+            </div>
+            <table  id="positionstable" class="table table-sm align-middle">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">
+                            Ticker
+                        </th>
+                        <th>
+                            Crypto Asset
+                        </th>
+                        <th class="text-right">
+                            Quantity
+                        </th>
+                        <th class="text-right">
+                            Latest Price (USD)
+                        </th>
+
+                        <th class="text-right small">
+                            24hr Chg
+                        </th>
+                        <th>
+
+                        </th>
+                        <th class="text-right">
+                            Position (USD)
+                        </th>
+                        <th class="text-right small">
+                            % of total
+                        </th>
+                        <th>
+
+                        </th>
+                        <th class="text-right small" data-toggle="tooltip" data-placement="top" title="Net B/E includes all realised and unrealised profits and losses less fees">
+                            Net Breakeven (USD)&#9432;
+                        </th>
+                        <th class="text-right">
+                            Net PnL
+                        </th>
+                        <th class="text-center small">
+                            Transaction fees
+                        </th>
+                        <th class="text-right">
+                            Return
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody id="portfolio">
+                    {% for position in positions %}
+                    {% if position[0] != "USD" %}
+                <tr id="ticker{{position[0]}}">
+                    <th class="align-middle" scope="row">{{position[0]}}</th>
+
+                    <td class="align-middle" id="name{{position[0]}}">
+                        {% for item in coininfo %}
+                        {% if item.symbol == position[0] %}
+                            {{item.name}}
+                            <script>
+                                $('#ticker{{position[0]}}').attr('id','{{item.id}}');
+                            </script>
+                        {% endif %}
+                        {% endfor %}
+
+                    </td>
+
+                    <td class="text-right align-middle" id="quantity{{position[0]}}">{{"{:,.4f}".format(position[1])}}</td>
+
+                    <td class="text-right align-middle" id="price{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+
+
+                    <td class="text-right small align-middle redgreen" id="chg24{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+
+                    <td class="text-center align-middle" id="img{{position[0]}}">
+
+                    </td>
+
+                    <td class="text-right align-middle" id="position{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+
+                    </td>
+
+                    <td class="text-right small align-middle" id="percent{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td>
+
+                    </td>
+
+                    <td data-qbuys={{pnllist[position[0]]["qbuys"]}} data-qsells={{pnllist[position[0]]["qsells"]}} data-buynotional={{pnllist[position[0]]["buynotional"]}} data-sellnotional={{pnllist[position[0]]["sellnotional"]}} data-fees={{pnllist[position[0]]["fees"]}} class="text-right small align-middle" id="cost{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+
+                    </td>
+                    <td class="text-right small align-middle redgreen" id="pnl{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td class="text-right small align-middle" id="fees{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+                    <td class="text-right small align-middle redgreen" id="return{{position[0]}}">
+                        <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                    </td>
+
+
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+<!-- Middle row with stats and pie chart -->
+<div class="row">
+        <div class="col col-sm-4">
+            <table id="portstats" class="table table-sm align-middle small">
+
+                <thead class="thead-light">
+                    <tr>
+                        <th colspan="2">
+                            Portfolio Summary Statistics
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="text-left">
+                        Unrealised PnL
+                        </th>
+                        <td id="unpnl" class="text-right">
+                            $0.000
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        Realised PnL
+                        </th>
+                        <td id="realpnl" class="text-right">
+                            $0.000
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        Total PnL
+                        </th>
+                        <td id="totalpnl" class="text-right">
+                            $0.000
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        Return
+                        </th>
+                        <td id="preturn" class="text-right">
+                            0.00%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        Total Fees
+                        </th>
+                        <td id="total_fees" class="text-right">
+                            $0.000
+                        </td>
+                    </tr>
+
+
+
+                </tbody>
+
+
+            </table>
+        </div>
+
+        <div class="col col-sm-4">
+            <div id="piechart" style="height: 200px; width: 150">
+            </div>
+        </div>
+
+        <div class="col col-sm-4">
+            <table id="portstats" class="table table-sm align-middle small">
+
+                <thead class="thead-light">
+                    <tr>
+                        <th colspan="2">
+                            Portfolio Performance
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="text-left">
+                        First Transaction (NAV=100)
+                        </th>
+                        <td id="firsttr" class="text-right">
+                            xx/xx/xx
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        Latest NAV
+                        </th>
+                        <td id="nav" class="text-right">
+                            $100.000 @ 1/2/2018
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="text-left">
+                        1 day change
+                        </th>
+                        <td id="1dc" class="text-right">
+                            0.00%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th id="7dc" class="text-left">
+                        7 day change
+                        </th>
+                        <td class="text-right">
+                            0.00%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th id="30dc" class="text-left">
+                        30 day change
+                        </th>
+                        <td class="text-right">
+                            0.00%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th id="1yc" class="text-left">
+                        1 year change
+                        </th>
+                        <td class="text-right">
+                            0.00%
+                        </td>
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+        </div>
+
+</div>
+
+<!-- Custody TABLE STARTS HERE -->
+<div class="row">
+<div class="col text-left">
+        <h6>Account Summary</h6>
+
+        <table id="custodytable" class="table table-sm align-middle">
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        Ticker
+                    </th>
+                    <!-- If the account is empty, do not show column -->
+                    {% for account in custody %}
+                        {% set ns = namespace(q=0) %}
+                        {% for position in positions %}
+                            {% if custody[account][position[0]] %}
+                                {% set ns.q = ns.q + (custody[account][position[0]] | float) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if ns.q > 0.00001 %}
+                            <th data-account="{{account}}">
+                                {{account}}
+                            </th>
+                        {% endif %}
+                    {% endfor %}
+                    <th class="total0">
+                        TOTAL
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody id="custody">
+
+
+                {% for position in positions %}
+                {% if position[0] != "USD" %}
+                    <tr>
+                        <th id="id">
+                            {{position[0]}}
+                        </th>
+
+                            {% for account in custody %}
+
+                            {% set ns = namespace(q=0) %}
+                            {% for position in positions %}
+                            {% if custody[account][position[0]] %}
+                                {% set ns.q = ns.q + (custody[account][position[0]] | float) %}
+                            {% endif %}
+                            {% endfor %}
+                            {% if ns.q > 0.00001 %}
+
+
+                            <!-- Does the account have any positions? -->
+
+                                    <td data-account="{{account[0]}}" class="position text-right">
+                                        {% if (custody[account][position[0]]) %}
+                                            {% if position[0] != "USD" %}
+                                                {{"{:,.4f}".format(custody[account][position[0]])}}
+                                            {% else %}
+                                                $ {{"{:,.2f}".format(custody[account][position[0]])}}
+                                            {% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                            {% endif %}
+                            {% endfor %}
+                        <td class="total-position text-right">
+                            <img class="mx-auto d-block" src="static/images/loading3.gif" width="25" height="25"></img>
+                        </td>
+                    </tr>
+
+                {% endif %}
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+</div>
+</div>
+
+<!-- TRANSACTION TABLE STARTS HERE -->
+<div class="row">
+<div class="col text-left">
+
+<h6>Transaction History</h6>
+
+    <table id="transactionstable" class="table table-sm align-middle">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="small" scope="col">
+                                Date
+                            </th>
+                            <th scope="col">
+                                Ticker
+                            </th>
+                            <th class="small" scope="col">
+                                Operation
+                            </th>
+                            <th scope="col">
+                                Quantity
+                            </th>
+
+                            <th scope="col">
+                                Price
+                            </th>
+                            <th class="small" scope="col">
+                                Fees
+                            </th>
+                            <th scope="col">
+                                Account
+                            </th>
+                            <th class="small" scope="col">
+                                Notes
+                            </th>
+                            <th class="small" scope="col">
+                                Edit
+                            </th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody id="transactions">
+                        {% for transaction in transactions %}
+
+                    <tr id="id{{transaction.id}}">
+
+                        <th class="align-middle text-center small" scope="row">{{transaction.trade_date.strftime('%Y-%m-%d')}}</td>
+                        <td class="align-middle text-center" scope="row">{{transaction.trade_asset_ticker}}</td>
+                        <td class="align-middle text-center small" scope="row">{{transaction.trade_operation}}</td>
+                        <td class="align-middle text-right" scope="row">{{"{:,.2f}".format(transaction.trade_quantity)}}</td>
+                        <td class="align-middle text-right" scope="row">${{"{:,.2f}".format(transaction.trade_price)}}</td>
+                        <td class="align-middle text-right small" scope="row">${{"{:,.2f}".format(transaction.trade_fees)}}</td>
+                        <td class="align-middle text-left" scope="row">{{transaction.trade_account}}</td>
+
+                        <td class="align-middle text-left small" scope="row">
+                            {% if transaction.trade_notes.startswith('Matching Trade for trade id:') %}
+                                <span class="text-info"><em> Asset and Cash Transaction </em> </span>
+                                </td>
+
+                                <td class="align-middle text-center small" scope="row">
+
+                                </td>
+                            {% else %}
+                                {{transaction.trade_notes}}
+                                </td>
+                                <td class="align-middle text-center small" scope="row">
+                                    <a href="/edittransaction?id={{transaction.id}}">
+                                    <img class="mx-auto d-block" src="static/images/edit.png" width="25" height="25"></img>
+                                </a>
+                                </td>
+
+                            {% endif %}
+
+
+
+                        {% endfor %}
+                    </tr>
+
+                    </tbody>
+                </table>
+</div>
+</div>
+
+<!-- END OF TRANSACTION TABLE -->
+</br>
+</br>
+</br>
+
+
+    <script src="/static/portfolio.js"></script>
+
+{% endblock content %}
