@@ -902,11 +902,15 @@ def daily_maint():
 def daily_maint_scheduler():
     # TIMERS for Maintenance Routine
     # daily_maint()  # Run at start and then wait xxx minutes to re-run
+    try:
+        daily_maint()
+        logging.info("Daily Maintenance executed ok at launch")
+    except ImportError:
+        print("Daily Maintenance skipped but will run again soon")
     sched = BackgroundScheduler(daemon=False)
     # sched.remove_job('sched')
     sched.add_job(daily_maint, 'cron', hour='3,9,12')
     sched.start()
     logging.info("[daily_maint_scheduler] Scheduled the daily Maintenance")
-
 
 daily_maint_scheduler()
