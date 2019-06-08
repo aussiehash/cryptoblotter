@@ -143,13 +143,17 @@ function createcharts() {
                 name: 'Allocation',
                 colorByPoint: true,
                 data: chartdata,
-                size: '95%',
-                innerSize: '60%',
+                size: '70%',
+                innerSize: '50%',
                 dataLabels: {
                     enabled: true,
-                    align: 'right',
-                    allowOverlap: false,
-                    format: '{point.name} : {point.y:.0f}%'
+                    align: 'left',
+                    allowOverlap: true,
+                    format: '{point.name} {point.y:.0f}%',
+                    connectorPadding: 1,
+                    distance: 1,
+                    softConnector: true,
+                    crookDistance: '20%'
                 },
             }]
             });

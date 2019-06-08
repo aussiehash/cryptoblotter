@@ -27,10 +27,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # Include global variables and error handling
 # --------------------------------------------
 ALPHAVANTAGE_API_KEY = Config.ALPHAVANTAGE_API_KEY
-If not ALPHAVANTAGE_API_KEY:
-    logging.error("WARNING! ALPHAVANTAGE_API_KEY not found. Please include "+
-        "at environment variables: "+
-        "$EXPORT ALPHAVANTAGE_API_KEY="<Your Key Here>")
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -118,8 +114,6 @@ def cost_calculation(user, ticker):
     cost_matrix['FIFO']['count'] = fifo_df['trade_operation'].count()
     cost_matrix['FIFO']['average_cost'] = fifo_df['adjusted_cv'].sum()\
         / open_position
-    print("FIFO")
-    print(fifo_df)
 
     # ---------------------------------------------------
     #  LIFO
@@ -146,12 +140,6 @@ def cost_calculation(user, ticker):
     cost_matrix['LIFO']['count'] = lifo_df['trade_operation'].count()
     cost_matrix['LIFO']['average_cost'] = lifo_df['adjusted_cv'].sum()\
         / open_position
-
-    print("LIFO")
-    print(lifo_df)
-
-    print("Cost Matrix")
-    print(cost_matrix)
 
     return (cost_matrix)
 
@@ -506,8 +494,6 @@ def generatenav(user, force=False):
             if (elapsed_seconds/60) < int(RENEW_NAV):
                 nav_pickle = pd.read_pickle(filename)
                 logging.info(f"Success: Open {filename} - no need to rebuild")
-                print("Loaded NAV from pickle")
-                print(nav_pickle)
                 return (nav_pickle)
             else:
                 logging.info("File found but too old - rebuilding NAV")
@@ -542,73 +528,70 @@ def generatenav(user, force=False):
     for id in tickers:
         if id == "USD":
             continue
-        filename = 'cryptoalpha/historical_data/'+id+'.json'
+        local_json,_,_ = alphavantage_historical(id)
         try:
-            with open(filename) as data_file:
-                local_json = json.loads(data_file.read())
-                data_file.close()
-                prices = pd.DataFrame(local_json[
-                    'Time Series (Digital Currency Daily)']).T
-                prices.reset_index(inplace=True)
-                # Reassign index to the date column
-                prices = prices.set_index(
-                    list(prices.columns[[0]]))
-                prices = prices['4a. close (USD)']
-                # convert string date to datetime
-                prices.index = pd.to_datetime(prices.index)
-                # rename index to date to match dailynav name
-                prices.index.rename('date', inplace=True)
-                prices.rename(id+'_price', inplace=True)
-                # Fill dailyNAV with prices for each ticker
-                dailynav = pd.merge(dailynav, prices, on='date', how='left')
-                # Update today's price with realtime data
-                try:
-                    dailynav[id+"_price"][-1] = rt_price_grab(id)['USD']
-                except IndexError:
-                    pass
+            prices = pd.DataFrame(local_json)
+            prices.reset_index(inplace=True)
+            # Reassign index to the date column
+            prices = prices.set_index(
+                list(prices.columns[[0]]))
+            prices = prices['4a. close (USD)']
+            # convert string date to datetime
+            prices.index = pd.to_datetime(prices.index)
+            # rename index to date to match dailynav name
+            prices.index.rename('date', inplace=True)
+            prices.rename(id+'_price', inplace=True)
+            # Fill dailyNAV with prices for each ticker
+            dailynav = pd.merge(dailynav, prices, on='date', how='left')
+            # Update today's price with realtime data
+            try:
+                dailynav[id+"_price"][-1] = rt_price_grab(id)['USD']
+            except IndexError:
+                pass
 
-                # Replace NaN with prev value, if no prev value then zero
-                dailynav[id+'_price'].fillna(method='ffill', inplace=True)
-                dailynav[id+'_price'].fillna(0, inplace=True)
-                # Now let's find trades for this ticker and include in dailynav
-                tradedf = df[['trade_asset_ticker',
-                              'trade_quantity', 'cash_value']].copy()
-                # Filter trades only for this ticker
-                tradedf = tradedf[tradedf['trade_asset_ticker'] == id]
-                # consolidate all trades in a single date Input
-                tradedf = tradedf.groupby(level=0).sum()
-                tradedf.sort_index(ascending=True, inplace=True)
-                # include column to cumsum quant
-                tradedf['cum_quant'] = tradedf['trade_quantity'].cumsum()
-                # merge with dailynav - 1st rename columns to include ticker
-                tradedf.index.rename('date', inplace=True)
-                tradedf.rename(columns={'trade_quantity': id+'_quant',
-                                        'cash_value': id+'_cash_value',
-                                        'cum_quant': id+'_pos'},
-                               inplace=True)
+            # Replace NaN with prev value, if no prev value then zero
+            dailynav[id+'_price'].fillna(method='ffill', inplace=True)
+            dailynav[id+'_price'].fillna(0, inplace=True)
+            # Now let's find trades for this ticker and include in dailynav
+            tradedf = df[['trade_asset_ticker',
+                          'trade_quantity', 'cash_value']].copy()
+            # Filter trades only for this ticker
+            tradedf = tradedf[tradedf['trade_asset_ticker'] == id]
+            # consolidate all trades in a single date Input
+            tradedf = tradedf.groupby(level=0).sum()
+            tradedf.sort_index(ascending=True, inplace=True)
+            # include column to cumsum quant
+            tradedf['cum_quant'] = tradedf['trade_quantity'].cumsum()
+            # merge with dailynav - 1st rename columns to include ticker
+            tradedf.index.rename('date', inplace=True)
+            tradedf.rename(columns={'trade_quantity': id+'_quant',
+                                    'cash_value': id+'_cash_value',
+                                    'cum_quant': id+'_pos'},
+                           inplace=True)
 
-                # merge
-                dailynav = pd.merge(dailynav, tradedf, on='date', how='left')
-                # for empty days just trade quantity = 0, same for CV
-                dailynav[id+'_quant'].fillna(0, inplace=True)
-                dailynav[id+'_cash_value'].fillna(0, inplace=True)
-                # Now, for positions, fill with previous values, NOT zero,
-                # unless there's no previous
-                dailynav[id+'_pos'].fillna(method='ffill', inplace=True)
-                dailynav[id+'_pos'].fillna(0, inplace=True)
-                # Calculate USD position
-                dailynav[id+'_usd_pos'] = dailynav[id+'_price'].astype(
-                    float) * dailynav[id+'_pos'].astype(float)
+            # merge
+            dailynav = pd.merge(dailynav, tradedf, on='date', how='left')
+            # for empty days just trade quantity = 0, same for CV
+            dailynav[id+'_quant'].fillna(0, inplace=True)
+            dailynav[id+'_cash_value'].fillna(0, inplace=True)
+            # Now, for positions, fill with previous values, NOT zero,
+            # unless there's no previous
+            dailynav[id+'_pos'].fillna(method='ffill', inplace=True)
+            dailynav[id+'_pos'].fillna(0, inplace=True)
+            # Calculate USD position
+            dailynav[id+'_usd_pos'] = dailynav[id+'_price'].astype(
+                float) * dailynav[id+'_pos'].astype(float)
 
-                # Before calculating NAV, clean the df for small
-                # dust positions. Otherwise, a portfolio close to zero but with
-                # 10 sats for example, would still have NAV changes
-                dailynav[id+'_usd_pos'].round(2)
-                logging.info(
-                    f"Success: imported prices from file:{filename}")
+            # Before calculating NAV, clean the df for small
+            # dust positions. Otherwise, a portfolio close to zero but with
+            # 10 sats for example, would still have NAV changes
+            dailynav[id+'_usd_pos'].round(2)
+            logging.info(
+                f"Success: imported prices from file:{filename}")
 
         except (FileNotFoundError, KeyError):
             logging.error(f"File not Found Error: ID: {id}")
+            # Download it and continue --- IMPLEMENT
 
     # Another loop to sum the portfolio values - maybe there is a way to
     # include this on the loop above. But this is not a huge time drag unless
@@ -672,8 +655,6 @@ def generatenav(user, force=False):
     dailynav.to_pickle(filename)
     logging.info(f"[generatenav] NAV saved to {filename}")
 
-    print("Daily NAV")
-    print(dailynav)
     return dailynav
 
 
@@ -716,11 +697,11 @@ def alphavantage_historical(id):
     # Alphavantage Keys can be generated free at
     # https://www.alphavantage.co/support/#api-key
 
-    try:
-        ALPHAVANTAGE_API_KEY = config['API_KEYS']['ALPHAVANTAGE_API_KEY']
-    except KeyError:
-        ALPHAVANTAGE_API_KEY = ""
-        logging.error("Cannot read config.ini for Alphavantage API Key")
+    # try:
+    #     ALPHAVANTAGE_API_KEY = config['API_KEYS']['ALPHAVANTAGE_API_KEY']
+    # except KeyError:
+    if ALPHAVANTAGE_API_KEY == "":
+        logging.error("Cannot read Alphavantage API Key from environment")
 
     filename = "cryptoalpha/alphavantage_data/" + id + ".aap"
     meta_filename = "cryptoalpha/alphavantage_data/" + id + "_meta.aap"
@@ -847,19 +828,16 @@ def daily_maint():
     app.app_context().push()
     # Daily Maintenance Job
     with app.app_context():
-        print(db)
         df = pd.read_sql_table('trades', db.engine)
     # ------ end of context -----
 
     tickers = df.trade_asset_ticker.unique()
-    loggin.info(f"[daily_maint] Read the tickers to download data: {tickers}")
     for id in tickers:
         if id == "USD":
             continue
         filename = 'cryptoalpha/historical_data/'+id+'.json'
 
         try:
-
             with open(filename) as data_file:
                 local_json = json.loads(data_file.read())
                 data_file.close()
@@ -911,11 +889,11 @@ def daily_maint_scheduler():
         daily_maint()
         logging.info("Daily Maintenance executed ok at launch")
     except ImportError:
-        print("Daily Maintenance skipped but will run again soon")
+        pass
     sched = BackgroundScheduler(daemon=False)
     # sched.remove_job('sched')
-    sched.add_job(daily_maint, 'cron', hour='3,9,12')
+    sched.add_job(daily_maint, 'cron', hour='1,3,9,12,14,16,17,19,23')
     sched.start()
     logging.info("[daily_maint_scheduler] Scheduled the daily Maintenance")
 
-daily_maint_scheduler()
+# daily_maint_scheduler()
