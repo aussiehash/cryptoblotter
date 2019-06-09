@@ -10,6 +10,10 @@ Crypto Blotter (CB) is a portfolio tracking tool. It includes position monitorin
 
 CB monitors daily _Net Asset Value (NAV)_. Similar to how a fund calculates performance. __So it's always tracking performance relative to current exposure.__
 
+### Sample Portfolio View:
+
+![Front Page](https://github.com/pxsocs/cryptoblotter/blob/master/cryptoalpha/static/images/github_images/portfolio.png)
+
 ### Why NAV is important?
 NAV is particularly important to anyone #stackingsats since it tracks performance relative to current capital allocated.
 For example, a portfolio going from $100 to $200 may seem like it 2x but the performance really depends if any new capital was invested or divested during this period. __NAV adjusts for cash inflows and outflows.__
